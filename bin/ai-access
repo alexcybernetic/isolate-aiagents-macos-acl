@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+    echo "Usage: ai-access <directory> {grant|revoke}"
+    echo "Example: ai-access . grant"
+    exit 1
+fi
+
+# Resolve directory to absolute path
+DIR=$(cd "$1" 2>/dev/null && pwd)
+
+if [ -z "$DIR" ]; then
+    echo "Error: Directory does not exist: $1"
+    exit 1
+fi
+
+ACL="allow read,write,list,add_file,search,add_subdirectory,delete_child,readattr,writeattr,readextattr,writeextattr,readsecurity,file_inherit,directory_inherit,delete"
+
+case "$2" in
+    grant)
+        echo "Granting access to: $DIR"
+        sudo chmod -R +a "user:aiagents $ACL" "$DIR" || exit 1
+        sudo chmod -R +a "user:$(whoami) $ACL" "$DIR" || exit 1
+        echo "✅ Access granted to: $DIR"
+        ;;
+    revoke)
+        echo "Revoking access from: $DIR"
+        sudo chmod -R -a "user:aiagents" "$DIR" 2>/dev/null || true
+        echo "✅ Access revoked from: $DIR"
+        ;;
+    *)
+        echo "Error: Action must be 'grant' or 'revoke'"
+        echo "Usage: ai-access <directory> {grant|revoke}"
+        exit 1
+        ;;
+esac
