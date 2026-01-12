@@ -1,20 +1,4 @@
-Version 0.1
-
-# Experimental AI Coding Agents Isolation for macOS
-Run AI coding CLI tools like Claude Code, OpenAI Codex, etc. in isolation.
-Isolation is essential to prevent unauthorized access to filesystem resources, limit blast radius 
-from agent errors or compromise, and protect sensitive credentials (SSH keys, API tokens) from exfiltration.
-
-## Key principles:
-1. Principle of Least Privilege - agents only access what they need
-2. Blast radius limitation - contains damage from bugs or LLM mistakes
-3. Credential protection - prevents/control access to ~/.ssh, ~/.aws, etc.
-4. Data exfiltration risk - AI agents send code to external APIs; isolation limits what can leak
-
-## How
-One shared user for all agents, ACL-controlled directory access. 
-
-## Quick Setup
+## Start
 
 ### 1. Create AI User
 - System Settings → Users & Groups → Add user
