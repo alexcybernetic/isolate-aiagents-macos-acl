@@ -30,7 +30,7 @@ which codex
 codex --version
 ```
 
-**Why user-local installation:**
+Why user-local installation:
 - ✅ Installs in `~/.npm-global` (user-owned directory)
 - ✅ No system-wide changes
 - ✅ Complete isolation from main user
@@ -53,7 +53,7 @@ codex
 
 ### Method 2: API Key
 
-**Authenticate using API key:**
+Authenticate using API key:
 
 ```bash
 # Set API key as environment variable temporarily
@@ -69,20 +69,20 @@ codex login status
 unset OPENAI_API_KEY
 ```
 
-**What this does:**
+What this does:
 - Pipes your API key to `codex login`
 - Codex stores credentials in `~/.codex/auth.json`
 - Future sessions use the cached credentials
 - No need to keep API key in environment permanently
 
-**Secure the auth file:**
+Secure the auth file:
 ```bash
 chmod 600 ~/.codex/auth.json
 ```
 
 ## Configure Sandbox Mode
 
-**Recommended sandbox configuration for isolation:**
+Recommended sandbox configuration for isolation:
 
 ```bash
 # Create or edit config file
@@ -100,24 +100,24 @@ network_access = false
 EOF
 ```
 
-**Sandbox mode options:**
+Sandbox mode options:
 - `read-only` (default) - Can read files, cannot modify anything
 - `workspace-write` (recommended) - Can modify workspace directory only
 - `danger-full-access` (never use!) - No restrictions
 
-**Approval policy options:**
+Approval policy options:
 - `untrusted` - Auto-run safe commands, prompt for risky ones
 - `on-request` (recommended) - Model decides when to ask
 - `on-failure` - Auto-run, prompt only on errors
 - `never` (dangerous!) - No prompts
 
-**Why these settings:**
+Why these settings:
 - ✅ Can modify files in granted project directory
 - ✅ Cannot modify files outside workspace
 - ✅ Network blocked (enable only if needed)
 - ✅ You approve sensitive operations
 
-**Enable network if needed:**
+Enable network if needed:
 ```toml
 [sandbox_workspace_write]
 network_access = true  # Allow network access
@@ -136,28 +136,9 @@ codex login status
 codex
 ```
 
-## Common Commands
-
-```bash
-# Start interactive session
-codex
-
-# Run with specific model
-codex --model gpt-5-codex
-
-# Non-interactive execution
-codex exec "run tests and fix failures"
-
-# Check status
-codex /status
-
-# Exit
-/exit
-```
-
 ## Troubleshooting
 
-**Codex command not found:**
+Codex command not found:
 ```bash
 # Check npm global bin directory
 npm list -g --depth=0
@@ -167,7 +148,7 @@ echo 'export PATH="$(npm config get prefix)/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-**Authentication fails:**
+Authentication fails:
 ```bash
 # Check auth status
 codex login status
@@ -179,7 +160,7 @@ codex login
 echo $OPENAI_API_KEY
 ```
 
-**Permission errors:**
+Permission errors:
 ```bash
 # Make sure you've granted ACL access to the project directory
 # (run as your main user)
@@ -187,7 +168,7 @@ exit
 ai-access /path/to/project grant
 ```
 
-**Sandbox errors:**
+Sandbox errors:
 ```bash
 # Check sandbox settings
 cat ~/.codex/config.toml

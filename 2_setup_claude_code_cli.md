@@ -23,17 +23,21 @@ source ~/.zshrc  # or source ~/.bashrc
 which claude
 ```
 
-## Authentication
+## Authentication & Default Sandbox Configuration
 
-**Store API key in Claude Code's settings file:**
+Store API key and enable sandbox by default:
 
 ```bash
-# Create settings file
+# Create settings file with sandbox enabled
 mkdir -p ~/.claude
 cat > ~/.claude/settings.json << 'EOF'
 {
   "env": {
     "ANTHROPIC_API_KEY": "your-anthropic-api-key-here"
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
   }
 }
 EOF
@@ -45,6 +49,11 @@ chmod 600 ~/.claude/settings.json
 cat ~/.claude/settings.json
 ```
 
+Sandbox configuration:
+- `"enabled": true` - Activates filesystem and network isolation by default
+- `"autoAllowBashIfSandboxed": true` - Auto-approves commands within sandbox boundaries
+- Commands trying to escape sandbox still require manual approval
+
 ## Test Installation
 
 ```bash
@@ -55,57 +64,43 @@ claude --version
 claude
 ```
 
-## Enable Sandbox Mode
+## Verify Sandbox Mode
 
-**Once Claude Code starts, configure sandbox:**
+Sandbox is now enabled by default from the settings.json configuration above.
 
-```
-/sandbox
-```
-
-**Choose:** Regular Permissions mode (NOT auto-allow)
-
-**What sandbox mode provides:**
+What sandbox mode provides:
 - ✅ Filesystem writes restricted to current working directory
 - ✅ Cannot modify files outside the project
 - ✅ Network traffic goes through proxy with domain allowlist
-- ✅ You review EVERY command before it executes
+- ✅ Commands within sandbox boundaries auto-execute
+- ✅ Commands trying to escape require manual approval
 
-**Sandbox modes:**
-- **Regular Permissions** (recommended) - Sandbox active, you approve each command
-- **Auto-allow** (NOT recommended) - Sandbox active, commands auto-execute without approval
-
-**Why Regular Permissions mode:**
-- You maintain visibility and control
-- Every command requires human review
-- Sandbox boundaries provide additional safety
-- Prevents blind execution of AI-generated commands
-
-**Network behavior in sandbox:**
+Network behavior in sandbox:
 - All network requests go through a proxy
 - Proxy maintains a domain allowlist
 - First request to new domain prompts for approval
 - Approved domains work without prompting afterward
 
-## Common Commands
+Alternative: Change settings interactively
 
-```bash
-# Check status
-/status
+You can also use the `/sandbox` command in any session to change modes:
 
-# Enable sandbox
-/sandbox
-
-# View help
-/help
-
-# Exit
-exit
 ```
+/sandbox
+```
+
+Available modes:
+- Auto-allow - Commands within sandbox auto-execute (current config)
+- Regular Permissions - Manual approval for all commands
+- Off - No sandboxing
+
+Sandbox configuration options:
+- `"autoAllowBashIfSandboxed": true` - Auto-approve safe commands (recommended for isolated user)
+- `"autoAllowBashIfSandboxed": false` - Manual approval for every command (more restrictive)
 
 ## Troubleshooting
 
-**Claude command not found:**
+Claude command not found:
 ```bash
 # Check if it's in ~/.local/bin
 ls ~/.local/bin/claude
@@ -115,7 +110,7 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-**Authentication fails:**
+Authentication fails:
 ```bash
 # Verify settings file exists and has correct permissions
 ls -la ~/.claude/settings.json
@@ -124,13 +119,37 @@ ls -la ~/.claude/settings.json
 cat ~/.claude/settings.json
 ```
 
-**Permission errors:**
+Permission errors:
 ```bash
 # Make sure you've granted ACL access to the project directory
 # (run as your main user)
 exit
 ai-access /path/to/project grant
 ```
+
+## Make Isolation Persistent (Optional)
+
+To avoid manually switching to `aiagents` user every time, add an alias to your main user's shell config:
+
+```bash
+# Exit back to your main user first
+exit
+
+# Add alias to automatically run claude as aiagents user
+echo 'alias claude="sudo -u aiagents -i bash -c \"cd \\\"\$PWD\\\" && claude\""' >> ~/.zshrc
+source ~/.zshrc
+
+# Or for bash:
+echo 'alias claude="sudo -u aiagents -i bash -c \"cd \\\"\$PWD\\\" && claude\""' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Now you can run `claude` from any project directory and it will:
+- Automatically switch to the `aiagents` user
+- Start in your current directory
+- Have sandbox mode enabled by default
+
+Note: This requires passwordless sudo for the aiagents user (see main setup guide).
 
 ## Exit Back to Main User
 
