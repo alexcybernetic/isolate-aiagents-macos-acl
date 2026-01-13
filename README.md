@@ -1,50 +1,119 @@
-Version 0.1
+Version 0.2
+⚠️ This is an early-stage, experimental tool. Please use it only if you possess the necessary skills and knowledge to comprehend its functionality.
 
-# Experimental AI Coding Agents Isolation for macOS
-Run AI coding CLI tools like Claude Code, OpenAI Codex, etc. in isolation.
-Isolation is essential to prevent unauthorized access to filesystem resources, limit blast radius 
-from agent errors or compromise, and protect sensitive credentials (SSH keys, API tokens) from exfiltration.
+# AI Agents Isolation for macOS
+Run AI coding agents (Claude Code, OpenAI Codex) as isolated user with ACL-based permissions.
 
-## Key principles:
-1. Principle of Least Privilege - agents only access what they need
-2. Blast radius limitation - contains damage from bugs or LLM mistakes
-3. Credential protection - prevents/control access to ~/.ssh, ~/.aws, etc.
-4. Data exfiltration risk - AI agents send code to external APIs; isolation limits what can leak
+## Overview
+Agents run as dedicated `aiagents` user with explicit filesystem access via macOS ACLs. Provides least-privilege access, blast radius limitation, credential protection, and data exfiltration control.
 
+## Security
 
-## How It Works
+Best practices:
+- Grant ACL per project directory only
+- Revoke when done: `ai-access . revoke`
+- Keep sandbox enabled
+- Review command approvals
+- Audit permissions: `ls -led . | grep aiagents`
 
-AI agents run as a dedicated `aiagents` user with no default filesystem access. You explicitly grant access to specific project directories using macOS ACLs (Access Control Lists).
+Passwordless sudo trade-off:
+- With: convenient, but compromised account gives instant aiagents access
+- Without: more secure, requires password each time
 
-## Quick Start
+Don't grant access to:
+- ~/.ssh (SSH keys)
+- ~/.aws (credentials)
+- ~/.config (tokens)
+- ~/Documents (personal files)
+- ~ (entire home directory)
 
-Follow the guides in order:
+## Prerequisites
+- macOS with ACL support
+- Administrator access
+- Terminal proficiency
 
-1. **[1_start.md](1_start.md)** - Create the `aiagents` user, install the ACL management script, and learn the basic workflow
-2. **[2_setup_claude_code_cli.md](2_setup_claude_code_cli.md)** - Install and configure Claude Code
-3. **[3_setup_codex_cli.md](3_setup_codex_cli.md)** - Install and configure OpenAI Codex CLI
+## Setup
 
-## The ACL Management Tool
-
-The `bin/ai-access` script manages directory permissions:
+### 1. Download the code
 
 ```bash
-# Grant access to a project directory
-ai-access /path/to/project grant
+# Clone via HTTPS
+git clone https://github.com/alexcybernetic/isolate-aiagents-macos-acl.git
+cd isolate-aiagents-macos-acl
 
-# Revoke access when done
-ai-access /path/to/project revoke
+# Or clone via SSH
+git clone git@github.com:alexcybernetic/isolate-aiagents-macos-acl.git
+cd isolate-aiagents-macos-acl
+
+# Or download ZIP and extract
+# https://github.com/alexcybernetic/isolate-aiagents-macos-acl/archive/refs/heads/main.zip
+```
+### 2. Create aiagents User
+Create standard user `aiagents` via System Settings > Users & Groups. 
+Log in once to initialize, then log out and login back to your main user.
+
+### 3. Run Setup
+```bash
+./bin/setup-aiagents.sh
 ```
 
-## Security Model
+Actions:
+- Verifies aiagents user exists
+- Prompts for optional sudoers rule (passwordless switching)
+- Installs ai-access script to ~/bin
+- Configures PATH in shell rc files
 
-- AI agents run as isolated user
-- No access to ~/.ssh, ~/.aws, ~/.config, personal files
-- Explicit permission grants via ACLs
-- Revocable access
-- Human approval for commands (sandbox/approval modes)
+Passwordless sudo:
+Without: password required each time (more secure)
+With: no password required (convenient, less secure if account compromised)
 
-## Requirements
+Creates `/etc/sudoers.d/aiagents` with `username ALL=(aiagents) NOPASSWD: ALL`
 
-- macOS (uses macOS ACL system)
-- Administrator access (for user creation and ACL management)
+### 4. Install Tools
+```bash
+./bin/install-claude.sh
+./bin/install-codex.sh  # Requires Node.js installed
+```
+
+Installers automatically switch to aiagents user and create wrapper scripts.
+
+See [docs/claude-setup.md](docs/claude-setup.md) and [docs/codex-setup.md](docs/codex-setup.md).
+
+### 5. Usage
+
+```bash
+cd ~/projects/my-project
+ai-access . grant
+claude
+```
+
+## Access Control Commands
+
+Grant access:
+```bash
+ai-access . grant
+```
+
+Revoke access:
+```bash
+ai-access . revoke
+```
+
+Check access:
+```bash
+ls -led . | grep aiagents
+```
+Output shows: `user:aiagents allow read,write,execute,delete...`
+
+
+## Uninstall
+
+```bash
+sudo dscl . -delete /Users/aiagents
+sudo rm /etc/sudoers.d/aiagents
+rm ~/bin/claude ~/bin/codex ~/bin/ai-access
+cd /path/to/project && ai-access . revoke  # Repeat for each granted directory
+```
+
+## License
+GNU GENERAL PUBLIC LICENSE, Version 3

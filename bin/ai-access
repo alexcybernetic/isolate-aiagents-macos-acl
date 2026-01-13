@@ -21,12 +21,12 @@ case "$2" in
         echo "Granting access to: $DIR"
         sudo chmod -R +a "user:aiagents $ACL" "$DIR" || exit 1
         sudo chmod -R +a "user:$(whoami) $ACL" "$DIR" || exit 1
-        echo "✅ Access granted to: $DIR"
+        echo "[OK] Access granted to: $DIR"
         ;;
     revoke)
         echo "Revoking access from: $DIR"
         sudo chmod -R -a "user:aiagents" "$DIR" 2>/dev/null || true
-        echo "✅ Access revoked from: $DIR"
+        echo "[OK] Access revoked from: $DIR"
         ;;
     *)
         echo "Error: Action must be 'grant' or 'revoke'"
