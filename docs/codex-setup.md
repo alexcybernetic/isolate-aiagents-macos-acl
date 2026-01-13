@@ -33,7 +33,7 @@ Functionality:
 
 ## Run
 Change into your project directory.
-Grant access and run claude:
+Grant access and run codex:
 ```bash
   ai-access . grant
   codex
